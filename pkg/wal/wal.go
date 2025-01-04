@@ -18,7 +18,7 @@ func WriteLog(op, key, value string) error {
 		return fmt.Errorf("error encoding log in WriteLog: %v", err)
 	}
 
-	file, err := os.OpenFile(LOGFILE, os.O_APPEND, 0644)
+	file, err := os.OpenFile(LOGFILE, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
 	if err != nil {
 		return fmt.Errorf("error reading log file in WriteLog: %v", err)
 	}

@@ -11,6 +11,10 @@ type KVStore struct {
 	Store map[string]string
 }
 
+var Kv_store = KVStore{
+	Store: make(map[string]string),
+}
+
 func (kv *KVStore) Set(key, value string) error {
 	if strings.Compare(key, "") == 0 {
 		return fmt.Errorf("cannot have empty key")
@@ -18,6 +22,10 @@ func (kv *KVStore) Set(key, value string) error {
 
 	if strings.Compare(value, "") == 0 {
 		return fmt.Errorf("cannot have empty value")
+	}
+	err := wal.WriteLog("SET", key, value)
+	if err != nil {
+		return fmt.Errorf("error writing to log file: %v", err)
 	}
 
 	kv.Store[key] = value
@@ -41,6 +49,11 @@ func (kv *KVStore) Remove(key string) error {
 	_, ok := kv.Store[key]
 	if !ok {
 		return fmt.Errorf("key does not exist")
+	}
+
+	err := wal.WriteLog("DELETE", key, "")
+	if err != nil {
+		return fmt.Errorf("error writing to log file: %v", err)
 	}
 
 	delete(kv.Store, key)
