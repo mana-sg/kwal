@@ -20,8 +20,8 @@ const (
 func main() {
 	storage.Kv_store.BuildStore()
 
-	fmt.Println("\003[H\033[2J")
-	fmt.Println("Welcome to my kv store!")
+	fmt.Print("\033[H\033[2J")
+	fmt.Println(White, "Welcome to my kv store!", Reset)
 
 	for {
 		fmt.Print("> ")
@@ -35,6 +35,7 @@ func main() {
 			if len(objects) != 3 {
 				fmt.Println(Red, "Expected 2 arguments received: ", len(objects)-1, Reset)
 				fmt.Println(White, "Usage:\n\tset <key> <value>", Reset)
+				break
 			}
 			err := storage.Kv_store.Set(objects[1], objects[2])
 			if err != nil {
@@ -45,6 +46,7 @@ func main() {
 			if len(objects) != 2 {
 				fmt.Println(Red, "Expected 1 arguments received: ", len(objects)-1, Reset)
 				fmt.Println(White, "Usage:\n\tget <key>", Reset)
+				break
 			}
 			val, err := storage.Kv_store.Get(objects[1])
 			if err != nil {
@@ -55,12 +57,30 @@ func main() {
 			if len(objects) != 2 {
 				fmt.Println(Red, "Expected 1 arguments received: ", len(objects)-1, Reset)
 				fmt.Println(White, "Usage:\n\tdel <key>", Reset)
+				break
 			}
 			err := storage.Kv_store.Remove(objects[1])
 			if err != nil {
 				fmt.Println(Red, "err removing value: \n", err, Reset)
 			}
 			fmt.Println("key: ", objects[1], ", removed succesfully\n")
+		case "help":
+			fmt.Println(White, "\nset: \tSets a key value pair.")
+			fmt.Println("\tUsage: set <key> <value>\n")
+
+			fmt.Println("get: \tGets the value for a given key.")
+			fmt.Println("\tUsage: get <key>\n")
+
+			fmt.Println("del: \tDeletes a key value pair from the database.")
+			fmt.Println("\tUsage: del <key>\n")
+
+			fmt.Println("cls: \tClears the screen")
+			fmt.Println("\tUsage: del <key>\n", Reset)
+		case "exit":
+			os.Exit(0)
+		case "cls":
+			fmt.Print("\033[H\033[2J")
+			fmt.Println(White, "Welcome to my kv store!", Reset)
 		}
 	}
 }
