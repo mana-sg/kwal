@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"log"
 
 	"github.com/mana-sg/kv-log-store/pkg/storage"
+	"github.com/mana-sg/kv-log-store/pkg/wal"
 )
 
 var scanner *bufio.Scanner = bufio.NewScanner(os.Stdin)
@@ -42,6 +44,7 @@ func main() {
 				fmt.Println(Red, "error setting value: \n", err, Reset)
 			}
 			fmt.Println("Key-Value pair added succesfully\n")
+
 		case "get":
 			if len(objects) != 2 {
 				fmt.Println(Red, "Expected 1 arguments received: ", len(objects)-1, Reset)
@@ -53,6 +56,7 @@ func main() {
 				fmt.Println(Red, "err getting value: \n", err, Reset)
 			}
 			fmt.Println(val, "\n")
+
 		case "del":
 			if len(objects) != 2 {
 				fmt.Println(Red, "Expected 1 arguments received: ", len(objects)-1, Reset)
@@ -64,7 +68,38 @@ func main() {
 				fmt.Println(Red, "err removing value: \n", err, Reset)
 			}
 			fmt.Println("key: ", objects[1], ", removed succesfully\n")
+
+		case "exit":
+			os.Exit(0)
+
+		case "cls":
+			fmt.Print("\033[H\033[2J")
+			fmt.Println(White, "Welcome to my kv store!", Reset)
+
+		case "size":
+			home, err := os.UserHomeDir() 			
+			filePath := home + "/kls/log.bin"
+			fileInfo, err := os.Stat(filePath)
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			fileSize := fileInfo.Size()
+			fmt.Println(White, "File size: ", fileSize,"bytes\n", Reset)
+
+		case "compact":
+			savings, err := wal.Compact()
+			if err != nil {
+				fmt.Println(Red, "error compacting: %v", err, Reset)
+			}
+
+			fmt.Println(White, "\nFile comaction succesful.", )
+			fmt.Println("File sie decreased by: ", savings * 100, "%\n", Reset)
+
 		case "help":
+			fallthrough
+
+		default:
 			fmt.Println(White, "\nset: \tSets a key value pair.")
 			fmt.Println("\tUsage: set <key> <value>\n")
 
@@ -74,13 +109,11 @@ func main() {
 			fmt.Println("del: \tDeletes a key value pair from the database.")
 			fmt.Println("\tUsage: del <key>\n")
 
+			fmt.Println("size: \tGets the size of the log file.")
+			fmt.Println("\tUsage: size\n")
+
 			fmt.Println("cls: \tClears the screen")
 			fmt.Println("\tUsage: del <key>\n", Reset)
-		case "exit":
-			os.Exit(0)
-		case "cls":
-			fmt.Print("\033[H\033[2J")
-			fmt.Println(White, "Welcome to my kv store!", Reset)
 		}
 	}
 }

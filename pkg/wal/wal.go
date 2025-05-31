@@ -82,6 +82,74 @@ func GetLogs() ([]t.LogEntry, error) {
 	return logs, nil
 }
 
+func Compact() (float64, error) {
+	compactionHelper := make(map[string]int)
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return 0, fmt.Errorf("unable to get user home directory: %v", err)
+	}
+	
+	PATH := home + LOGFILE
+	fileInfo, err := os.Stat(PATH)
+	if err != nil {
+		return 0, fmt.Errorf("unable to stat file: %v", err)
+	}
+
+	beforeSize := fileInfo.Size()
+	file, err := os.Open(PATH)
+	if err != nil {
+		return 0, fmt.Errorf("error reading log file in Compact: %v", err)
+	}
+	defer file.Close()
+
+	var logs []string
+	scanner := bufio.NewScanner(file)
+	lineNo := 0
+
+	for scanner.Scan() {
+		line := scanner.Text()
+		log, err := utils.DecodeLog([]byte(line))
+		if err != nil {
+			continue 
+		}
+		logs = append(logs, line)
+		compactionHelper[log.Key] = lineNo
+		lineNo++
+	}
+
+	if err := scanner.Err(); err != nil {
+		return 0, fmt.Errorf("error scanning log file: %v", err)
+	}
+
+	tempFilePath := PATH + ".tmp"
+	tempFile, err := os.Create(tempFilePath)
+	if err != nil {
+		return 0, fmt.Errorf("unable to create temp log file: %v", err)
+	}
+	defer tempFile.Close()
+
+	for _, idx := range compactionHelper {
+		_, err := tempFile.WriteString(logs[idx] + "\n")
+		if err != nil {
+			return 0, fmt.Errorf("error writing compacted log: %v", err)
+		}
+	}
+
+	err = os.Rename(tempFilePath, PATH)
+	if err != nil {
+		return 0, fmt.Errorf("failed to replace log file: %v", err)
+	}
+
+	afterInfo, err := os.Stat(PATH)
+	if err != nil {
+		return 0, fmt.Errorf("unable to stat compacted file: %v", err)
+	}
+	afterSize := afterInfo.Size()
+
+	savings := float64(beforeSize-afterSize) / float64(beforeSize)
+	return savings, nil
+}
+
 func CreateLog(op, key, value string) t.LogEntry {
 	return t.LogEntry{
 		Operation: op,
