@@ -9,16 +9,23 @@ import (
 	"github.com/mana-sg/kv-log-store/utils"
 )
 
-var LOGFILE string = "log.bin"
+var LOGFILE string = "/kls/log.bin"
 
 func WriteLog(op, key, value string) error {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return fmt.Errorf("error getting user home directory: %v", err)
+	}
+
+	PATH := homeDir + LOGFILE
+
 	log := CreateLog(op, key, value)
 	encodedLog, err := utils.EncodeLog(log)
 	if err != nil {
 		return fmt.Errorf("error encoding log in WriteLog: %v", err)
 	}
 
-	file, err := os.OpenFile(LOGFILE, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
+	file, err := os.OpenFile(PATH, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
 	if err != nil {
 		return fmt.Errorf("error reading log file in WriteLog: %v", err)
 	}
@@ -38,10 +45,17 @@ func WriteLog(op, key, value string) error {
 }
 
 func GetLogs() ([]t.LogEntry, error) {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return nil, fmt.Errorf("error getting user home directory: %v", err)
+	}
+
+	PATH := homeDir + LOGFILE
+
 	var logs []t.LogEntry
 
-	if _, err := os.Stat(LOGFILE); os.IsNotExist(err) {
-		f, err := os.Create(LOGFILE)
+	if _, err := os.Stat(PATH); os.IsNotExist(err) {
+		f, err := os.Create(PATH)
 		defer f.Close()
 		if err != nil {
 			return nil, fmt.Errorf("error creating log file in GetLogs: %v", err)
@@ -49,7 +63,7 @@ func GetLogs() ([]t.LogEntry, error) {
 		return logs, nil
 	}
 
-	file, err := os.Open(LOGFILE)
+	file, err := os.Open(PATH)
 	if err != nil {
 		return nil, fmt.Errorf("error reading log file in GetLogs: %v", err)
 	}
