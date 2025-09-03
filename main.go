@@ -22,7 +22,7 @@ func main() {
 	_ = godotenv.Load()
 
 	if len(os.Args) < 2 {
-		fmt.Println("Usage: kls [start|stop|restart]")
+		fmt.Println("Usage: kls [start|stop|restart|status]")
 		os.Exit(1)
 	}
 
@@ -34,10 +34,13 @@ func main() {
 	case "restart":
 		stopServer()
 		startServer()
+	case "status":
+		checkStatus()
 	default:
 		fmt.Println("start: \tStarts the API server.")
 		fmt.Println("stop: \tStops the API server if running.")
 		fmt.Println("restart: \tRestarts the API server.")
+		fmt.Println("status: \tCheck the status of the server.")
 	}
 }
 
@@ -77,6 +80,29 @@ func startServer() {
 
     _ = os.WriteFile(pidFile, []byte(strconv.Itoa(cmd.Process.Pid)), 0644)
     fmt.Println(White, "Server started with PID:", cmd.Process.Pid, Reset)
+}
+
+func checkStatus() {
+	data, err := os.ReadFile(pidFile)
+	if err != nil {
+		fmt.Println(White, "KLS daemon is not running.", Reset)
+		return
+	}
+
+	pid, err := strconv.Atoi(string(data))
+	if err != nil {
+		fmt.Println(Red, "Invalid PID in pid file.", Reset)
+		return
+	}
+
+	_, err = os.FindProcess(pid)
+	if err != nil {
+		fmt.Println(Red, "Error finding process:", err.Error(), Reset)
+		_ = os.Remove(pidFile)
+		return
+	}
+
+	print(White, "Daemon up and running with PID: ", pid, Reset)
 }
 
 
