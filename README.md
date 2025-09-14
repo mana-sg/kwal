@@ -1,5 +1,5 @@
-# kv-log-store
-`kv-log-store` is a lightweight in-memory key-value store with persistence achieved through a write-ahead log (WAL). It supports basic operations like setting, retrieving, and deleting key-value pairs, ensuring data durability by logging all operations to a file.
+# KWal
+`KWal` is a lightweight in-memory key-value store with persistence achieved through a write-ahead log (WAL). It supports basic operations like setting, retrieving, and deleting key-value pairs, ensuring data durability by logging all operations to a file.
 
 ## Features
 - **In-Memory Storage**: Fast access to key-value pairs stored in memory.
@@ -14,8 +14,8 @@
 ## Installation
 1. Clone the repository:
      ```sh
-     git clone https://github.com/mana-sg/kv-log-store.git
-     cd kv-log-store
+     git clone https://github.com/mana-sg/kwal.git
+     cd kwal
      ```
 2. Create a `.env` file in the project root:
      ```sh
@@ -41,17 +41,17 @@ Use the `kls` command to manage the kv-log-store service running in the backgrou
 
 #### Start the service:
 ```sh
-kls start
+kwal start
 ```
 
 #### Stop the service:
 ```sh
-kls stop
+kwal stop
 ```
 
 #### Restart the service:
 ```sh
-kls restart
+kwal restart
 ```
 
 The service runs as a background daemon and exposes HTTP endpoints for interaction.

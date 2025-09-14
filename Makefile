@@ -1,7 +1,7 @@
-BINARY_NAME = kls
+BINARY_NAME = kwal
 TARGET = main.go
 INSTALL_DIR = /usr/local/bin
-CONFIG_DIR = $(HOME)/kls
+CONFIG_DIR = $(HOME)/kwal
 
 build:
 	@echo "🔨 Building binary..."
